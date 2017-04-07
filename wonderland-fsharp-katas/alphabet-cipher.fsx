@@ -4,12 +4,12 @@ open System
 type Message = string
 type Keyword = string
 
-let normalize (key:Keyword) (message:Message) : Keyword =
-    let rec internalNormalize (key:Keyword) (message:Message) : Keyword =
-        if (key.Length >= message.Length) then key.Substring(0, message.Length)
-        else internalNormalize (key + key) message
+let normalize value key =
+    let rec internalNormalize value (key:Keyword) =
+        if (key.Length >= value) then key.Substring(0, value)
+        else (key + key) |> internalNormalize value
 
-    internalNormalize key message
+    internalNormalize value key
 
 let offset (value:int) (phrase:string) = 
     let h = phrase |> Seq.take value |> String.Concat
@@ -31,9 +31,9 @@ let decipher (cipher:Message) (message:Message) : Keyword =
 open Swensen.Unquote
 
 let tests () =
-    test <@ normalize "vigilance" "meetmeontuesdayeveningatseven" = "vigilancevigilancevigilancevi" @>
-    test <@ normalize "vigilance" "meetmeont" = "vigilance" @>
-    test <@ normalize "vigilance" "meetme" = "vigila" @>
+    test <@ normalize 29 "vigilance"  = "vigilancevigilancevigilancevi" @>
+    test <@ normalize 9 "vigilance" = "vigilance" @>
+    test <@ normalize 6 "vigilance" = "vigila" @>
 
     test <@offset 0 "abcdefg" = "abcdefg"@>
     test <@offset 1 "abcdefg" = "bcdefga"@>
