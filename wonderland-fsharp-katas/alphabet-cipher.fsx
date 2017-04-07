@@ -4,7 +4,11 @@ open System
 type Message = string
 type Keyword = string
 
-let normalize value key =
+let defaultPhrase = "abcdefghijklmnopqrstuvwxyz"
+let convertToInt (value:char) = Convert.ToInt32(value) - Convert.ToInt32('a')
+
+
+let normalize value key : Keyword =
     let rec internalNormalize value (key:Keyword) =
         if (key.Length >= value) then key.Substring(0, value)
         else (key + key) |> internalNormalize value
@@ -19,7 +23,13 @@ let offset (value:int) (phrase:string) =
 
  
 let encode (key:Keyword) (message:Message) : Message =
-    "encodeme"
+    key 
+    |> normalize message.Length
+    |> Seq.zip message
+    |> Seq.map (fun (s, m) -> defaultPhrase |> offset (convertToInt s) |> Seq.item (convertToInt m))
+    |> String.Concat
+    
+    
 
 let decode (key:Keyword) (message:Message) : Message =
     "decodeme"
@@ -44,8 +54,8 @@ let tests () =
     test <@offset 6 "abcdefg" = "gabcdef"@>
                                    
     // verify encoding
-    //test <@ encode "vigilance" "meetmeontuesdayeveningatseven" = "hmkbxebpxpmyllyrxiiqtoltfgzzv" @>
-    //test <@ encode "scones" "meetmebythetree" = "egsgqwtahuiljgs" @>
+    test <@ encode "vigilance" "meetmeontuesdayeveningatseven" = "hmkbxebpxpmyllyrxiiqtoltfgzzv" @>
+    test <@ encode "scones" "meetmebythetree" = "egsgqwtahuiljgs" @>
 
     // verify decoding
     //test <@ decode "vigilance" "hmkbxebpxpmyllyrxiiqtoltfgzzv" = "meetmeontuesdayeveningatseven" @>
