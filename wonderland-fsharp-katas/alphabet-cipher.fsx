@@ -58,7 +58,11 @@ let decode (key:Keyword) (message:Message) : Message =
 
 
 let decipher (cipher:Message) (message:Message) : Keyword =
-    "decypherme"
+    cipher
+    |> Seq.zip message
+    |> Seq.map (fun (c, m) -> defaultPhrase |> offset (convertToInt c) |> Seq.findIndex (fun x -> x = m) |> convertFromInt)
+    |> String.Concat
+    |> denormalize
 
 #r @"../packages/Unquote/lib/net45/Unquote.dll"
 open Swensen.Unquote
@@ -88,8 +92,8 @@ let tests () =
     test <@ decode "scones" "egsgqwtahuiljgs" = "meetmebythetree" @>
 
     // verify decyphering
-    // test <@ decipher "opkyfipmfmwcvqoklyhxywgeecpvhelzg" "thequickbrownfoxjumpsoveralazydog" = "vigilance" @>
-    // test <@ decipher "hcqxqqtqljmlzhwiivgbsapaiwcenmyu" "packmyboxwithfivedozenliquorjugs" = "scones" @>
+    test <@ decipher "opkyfipmfmwcvqoklyhxywgeecpvhelzg" "thequickbrownfoxjumpsoveralazydog" = "vigilance" @>
+    test <@ decipher "hcqxqqtqljmlzhwiivgbsapaiwcenmyu" "packmyboxwithfivedozenliquorjugs" = "scones" @>
 
 // run the tests
 tests ()
