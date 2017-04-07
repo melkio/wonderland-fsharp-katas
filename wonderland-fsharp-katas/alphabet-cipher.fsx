@@ -6,6 +6,7 @@ type Keyword = string
 
 let defaultPhrase = "abcdefghijklmnopqrstuvwxyz"
 let convertToInt (value:char) = Convert.ToInt32(value) - Convert.ToInt32('a')
+let convertFromInt (value:int) = Convert.ToChar(value + Convert.ToInt32('a'))
 
 
 let normalize value key : Keyword =
@@ -32,7 +33,12 @@ let encode (key:Keyword) (message:Message) : Message =
     
 
 let decode (key:Keyword) (message:Message) : Message =
-    "decodeme"
+    key 
+    |> normalize message.Length
+    |> Seq.zip message
+    |> Seq.map (fun (s, m) -> defaultPhrase |> offset (convertToInt m) |> Seq.findIndex (fun x -> x = s) |> convertFromInt )
+    |> String.Concat
+
 
 let decipher (cipher:Message) (message:Message) : Keyword =
     "decypherme"
@@ -58,8 +64,8 @@ let tests () =
     test <@ encode "scones" "meetmebythetree" = "egsgqwtahuiljgs" @>
 
     // verify decoding
-    //test <@ decode "vigilance" "hmkbxebpxpmyllyrxiiqtoltfgzzv" = "meetmeontuesdayeveningatseven" @>
-    //test <@ decode "scones" "egsgqwtahuiljgs" = "meetmebythetree" @>
+    test <@ decode "vigilance" "hmkbxebpxpmyllyrxiiqtoltfgzzv" = "meetmeontuesdayeveningatseven" @>
+    test <@ decode "scones" "egsgqwtahuiljgs" = "meetmebythetree" @>
 
     // verify decyphering
     // test <@ decipher "opkyfipmfmwcvqoklyhxywgeecpvhelzg" "thequickbrownfoxjumpsoveralazydog" = "vigilance" @>
