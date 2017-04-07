@@ -8,7 +8,6 @@ let defaultPhrase = "abcdefghijklmnopqrstuvwxyz"
 let convertToInt (value:char) = Convert.ToInt32(value) - Convert.ToInt32('a')
 let convertFromInt (value:int) = Convert.ToChar(value + Convert.ToInt32('a'))
 
-
 let normalize value key : Keyword =
     let rec internalNormalize value (key:Keyword) =
         if (key.Length >= value) then key.Substring(0, value)
@@ -22,17 +21,19 @@ let denormalize (key:Keyword) : Keyword =
         |> normalize key.Length
         |> Seq.zip key
         |> Seq.map (fun (x, y) -> x = y)
-        |> Seq.forall (fun x -> x)
+        |> Seq.forall id
 
     let rec internalDenormalize (value:int) (key:Keyword) : Keyword =
+        let safeInternalDenormalize (value:int) (key:Keyword) : Keyword =
+            match isDenormalized value key with
+                | true -> key.Substring(0, value+1)
+                | false -> internalDenormalize (value+1) key
+
         if (key.Length <= value) then key
-        else if isDenormalized value key then key.Substring(0, value+1)
-        else internalDenormalize (value+1) key
+        else safeInternalDenormalize value key
 
     internalDenormalize 0 key
     
-    
-
 let offset (value:int) (phrase:string) = 
     let h = phrase |> Seq.take value |> String.Concat
     let t = phrase.Substring value
@@ -46,8 +47,6 @@ let encode (key:Keyword) (message:Message) : Message =
     |> Seq.zip message
     |> Seq.map (fun (s, m) -> defaultPhrase |> offset (convertToInt s) |> Seq.item (convertToInt m))
     |> String.Concat
-    
-    
 
 let decode (key:Keyword) (message:Message) : Message =
     key 
@@ -55,7 +54,6 @@ let decode (key:Keyword) (message:Message) : Message =
     |> Seq.zip message
     |> Seq.map (fun (s, m) -> defaultPhrase |> offset (convertToInt m) |> Seq.findIndex (fun x -> x = s) |> convertFromInt )
     |> String.Concat
-
 
 let decipher (cipher:Message) (message:Message) : Keyword =
     cipher
