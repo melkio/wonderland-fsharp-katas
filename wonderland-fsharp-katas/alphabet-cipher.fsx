@@ -1,4 +1,5 @@
 // See the file alphabet-cipher.md for detailed information.
+open System
 
 type Message = string
 type Keyword = string
@@ -10,6 +11,13 @@ let normalize (key:Keyword) (message:Message) : Keyword =
 
     internalNormalize key message
 
+let offset (value:int) (phrase:string) = 
+    let h = phrase |> Seq.take value |> String.Concat
+    let t = phrase.Substring value
+
+    String.Concat(t, h)
+
+ 
 let encode (key:Keyword) (message:Message) : Message =
     "encodeme"
 
@@ -26,6 +34,14 @@ let tests () =
     test <@ normalize "vigilance" "meetmeontuesdayeveningatseven" = "vigilancevigilancevigilancevi" @>
     test <@ normalize "vigilance" "meetmeont" = "vigilance" @>
     test <@ normalize "vigilance" "meetme" = "vigila" @>
+
+    test <@offset 0 "abcdefg" = "abcdefg"@>
+    test <@offset 1 "abcdefg" = "bcdefga"@>
+    test <@offset 2 "abcdefg" = "cdefgab"@>
+    test <@offset 3 "abcdefg" = "defgabc"@>
+    test <@offset 4 "abcdefg" = "efgabcd"@>
+    test <@offset 5 "abcdefg" = "fgabcde"@>
+    test <@offset 6 "abcdefg" = "gabcdef"@>
                                    
     // verify encoding
     //test <@ encode "vigilance" "meetmeontuesdayeveningatseven" = "hmkbxebpxpmyllyrxiiqtoltfgzzv" @>
