@@ -16,6 +16,23 @@ let normalize value key : Keyword =
 
     internalNormalize value key
 
+let denormalize (key:Keyword) : Keyword =
+    let isDenormalized (value:int) (key:Keyword) =
+        key.[..value] 
+        |> normalize key.Length
+        |> Seq.zip key
+        |> Seq.map (fun (x, y) -> x = y)
+        |> Seq.forall (fun x -> x)
+
+    let rec internalDenormalize (value:int) (key:Keyword) : Keyword =
+        if (key.Length <= value) then key
+        else if isDenormalized value key then key.Substring(0, value+1)
+        else internalDenormalize (value+1) key
+
+    internalDenormalize 0 key
+    
+    
+
 let offset (value:int) (phrase:string) = 
     let h = phrase |> Seq.take value |> String.Concat
     let t = phrase.Substring value
@@ -50,6 +67,9 @@ let tests () =
     test <@ normalize 29 "vigilance"  = "vigilancevigilancevigilancevi" @>
     test <@ normalize 9 "vigilance" = "vigilance" @>
     test <@ normalize 6 "vigilance" = "vigila" @>
+
+    test <@ denormalize "vigilancevigilancevigilancevigila"  = "vigilance" @>
+    test <@ denormalize "sconessconessconessconessconessc" = "scones" @>
 
     test <@offset 0 "abcdefg" = "abcdefg"@>
     test <@offset 1 "abcdefg" = "bcdefga"@>
