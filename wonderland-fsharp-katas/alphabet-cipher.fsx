@@ -4,9 +4,10 @@ open System
 type Message = string
 type Keyword = string
 
-let defaultPhrase = "abcdefghijklmnopqrstuvwxyz"
-let convertToInt (value:char) = Convert.ToInt32(value) - Convert.ToInt32('a')
-let convertFromInt (value:int) = Convert.ToChar(value + Convert.ToInt32('a'))
+let defaultPhrase = ['a'..'z'] |> String.Concat
+
+let convertToInt (value:char) = ['a'..'z'] |> List.findIndex (fun x -> x = value) 
+let convertFromInt (value:int) = ['a'..'z'] |> List.item value 
 
 let normalize value key : Keyword =
     let rec internalNormalize value (key:Keyword) =
