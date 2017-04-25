@@ -36,10 +36,8 @@ let denormalize (key:Keyword) : Keyword =
     internalDenormalize 0 key
     
 let offset (value:int) (phrase:string) = 
-    let h = phrase |> Seq.take value |> String.Concat
-    let t = phrase.Substring value
-
-    String.Concat(t, h)
+    Seq.append (phrase |> Seq.skip value) (phrase |> Seq.take value)
+    |> String.Concat
 
  
 let encode (key:Keyword) (message:Message) : Message =
